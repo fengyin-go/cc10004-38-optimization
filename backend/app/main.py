@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.routers import ROUTERS
+from app.services.derive.bootstrap import bootstrap_evidence
 from app.store import store
 
 app = FastAPI(title="数据洞察分析工作台", version="1.0.0")
@@ -24,6 +25,12 @@ app.add_middleware(
 
 for module in ROUTERS:
     app.include_router(module.router)
+
+
+@app.on_event("startup")
+def _startup_evidence() -> None:
+    """启动时装载筛选规则条件、标签版本等推导证据。"""
+    bootstrap_evidence()
 
 
 @app.get("/api/health")
